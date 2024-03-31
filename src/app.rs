@@ -20,7 +20,7 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 <Routes>
-                    <Route path="" view=HomePage/>
+                    <Route path="" view=GameView/>
                     <Route path="/*any" view=NotFound/>
                 </Routes>
             </main>
@@ -28,20 +28,6 @@ pub fn App() -> impl IntoView {
     }
 }
 
-/// Renders the home page of your application.
-#[component]
-fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    // let (count, set_count) = create_signal(0);
-    // let on_click = move |_| set_count.update(|count| *count += 1);
-
-    view! {
-        <h1>"Welcome to Leptos"</h1>
-        <p>"This is a simple example of a Leptos application."</p>
-        <p>"Click the button to increment the count."</p>
-        <GameView />
-    }
-}
 
 /// 404 - Not Found
 #[component]
