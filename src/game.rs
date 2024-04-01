@@ -1,6 +1,6 @@
-use rand::Rng;
+use gloo::console::log;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Cell {
     pub x: i32,
     pub y: i32,
@@ -19,7 +19,7 @@ impl Cell {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ConditionalProbabilities {
     distance: i32,
     green: f32,
@@ -46,7 +46,7 @@ impl ConditionalProbabilities {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Game {
     pub grid: Vec<Vec<Cell>>,
     ghost_position: (i32, i32),
@@ -69,12 +69,12 @@ impl Game {
             grid.push(row);
         }
         let conditional_probabilities = vec![
-            ConditionalProbabilities::new(0, 0.05, 0.10, 0.20, 0.65),
-            ConditionalProbabilities::new(1, 0.05, 0.15, 0.60, 0.20),
-            ConditionalProbabilities::new(2, 0.05, 0.15, 0.60, 0.20),
-            ConditionalProbabilities::new(3, 0.20, 0.60, 0.15, 0.05),
-            ConditionalProbabilities::new(4, 0.20, 0.60, 0.15, 0.05),
-            ConditionalProbabilities::new(5, 0.60, 0.20, 0.10, 0.05),
+            ConditionalProbabilities::new(0, 0.05, 0.05, 0.10, 0.80),
+            ConditionalProbabilities::new(1, 0.05, 0.10, 0.75, 0.10),
+            ConditionalProbabilities::new(2, 0.05, 0.10, 0.75, 0.10),
+            ConditionalProbabilities::new(3, 0.10, 0.70, 0.15, 0.05),
+            ConditionalProbabilities::new(4, 0.10, 0.70, 0.15, 0.05),
+            ConditionalProbabilities::new(5, 0.70, 0.10, 0.10, 0.05),
         ];
         Game {
             grid,
@@ -137,27 +137,60 @@ impl Game {
         }
     }
 
-    pub fn update_posterior_ghost_location_probabilities(&mut self, color: String, x: i32, y: i32) {
+    pub fn update_posterior_ghost_location_probabilities(&mut self, color: String, x: i32, y: i32) -> Result<Game, String> {
         // Update the probabilities of the ghost being in each cell based on the color sensed in the cell (x, y)
         // and the other sensed colors in the grid
 
         let mut sum = 0.0;
         for i in 0..self.grid.len() {
             for j in 0..self.grid[0].len() {
-                // let distance = (i as i32 - x as i32).abs() + ((j as i32) - y as i32).abs();
-                let prior_probability = self.grid[i as usize][j as usize].probability;
-                let mut likelihood = 0.0;
-                if self.grid[i as usize][j as usize].color == color {
-                    likelihood = 1.0;
-                }
-                self.grid[i as usize][j as usize].probability = prior_probability * likelihood;
+                // Get the (i, j) cell's distance from the ghost position based on its distance from the (x, y) cell
+                // and the distance between the (x, y) cell and the ghost position (given by the
+                // color)
+                
+                let dist = (x - i as i32).abs() + (y - j as i32).abs();
+                
+                let index = match self
+                    .conditional_probabilities
+                    .iter()
+                    .position(|p| p.distance == dist)
+                {
+                    Some(i) => i,
+                    None => 5,
+                };
+                let prior = self.grid[i as usize][j as usize].probability;
+                let likelihood = if color == "green" {
+                    self.conditional_probabilities[index].green
+                } else if color == "yellow" {
+                    self.conditional_probabilities[index].yellow
+                } else if color == "orange" {
+                    self.conditional_probabilities[index].orange
+                } else {
+                    self.conditional_probabilities[index].red
+                };
+                self.grid[i as usize][j as usize].probability = prior * likelihood;
                 sum += self.grid[i as usize][j as usize].probability;
             }
         }
         for i in 0..self.grid.len() {
             for j in 0..self.grid[0].len() {
                 self.grid[i as usize][j as usize].probability /= sum;
+                // println!(
+                    // "({}, {}): {:.2}%",
+                    // i,
+                    // j,
+                    // self.grid[i as usize][j as usize].probability * 100.0
+                // );
+                // log!(
+                    // &format!(
+                        // "({}, {}): {:.2}%",
+                        // i,
+                        // j,
+                        // self.grid[i as usize][j as usize].probability * 100.0
+                    // )
+                // );
             }
         }
+        return Ok(self.clone());
     }
 }
