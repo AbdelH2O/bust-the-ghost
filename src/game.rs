@@ -137,7 +137,7 @@ impl Game {
         }
     }
 
-    pub fn update_posterior_ghost_location_probabilities(&mut self, color: String, x: i32, y: i32) -> Result<Game, String> {
+    pub fn update_posterior_ghost_location_probabilities(&mut self, color: String, x: i32, y: i32) {
         // Update the probabilities of the ghost being in each cell based on the color sensed in the cell (x, y)
         // and the other sensed colors in the grid
 
@@ -191,6 +191,5 @@ impl Game {
                 // );
             }
         }
-        return Ok(self.clone());
     }
 }

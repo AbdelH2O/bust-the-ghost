@@ -58,16 +58,8 @@ pub fn GameView() -> impl IntoView {
                         set_game.update(|game| {
                             log!(&format!("Bust: {}, {}", x, y));
                             let color = game.distance_sense(x, y);
-                            let new_game = game.update_posterior_ghost_location_probabilities(color, x, y);
-                            match new_game {
-                                Ok(new_game) => {
-                                    log!(&format!("New game: {:?}", new_game));
-                                    *game = new_game;
-                                }
-                                Err(e) => {
-                                    log!(&format!("Error: {}", e));
-                                }
-                            }
+                            game.grid[x as usize][y as usize].color = color.clone();
+                            game.update_posterior_ghost_location_probabilities(color, x, y);
                         });
                     }
                 >
