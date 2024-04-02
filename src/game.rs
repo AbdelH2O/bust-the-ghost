@@ -1,4 +1,5 @@
 use gloo::console::log;
+use rand::distributions::Distribution;
 
 #[derive(Clone, Debug)]
 pub struct Cell {
@@ -6,6 +7,7 @@ pub struct Cell {
     pub y: i32,
     pub color: String,
     pub probability: f32,
+    pub visited: bool,
 }
 
 impl Cell {
@@ -15,6 +17,7 @@ impl Cell {
             y,
             color,
             probability,
+            visited: false,
         }
     }
 }
@@ -49,7 +52,7 @@ impl ConditionalProbabilities {
 #[derive(Clone, Debug)]
 pub struct Game {
     pub grid: Vec<Vec<Cell>>,
-    ghost_position: (i32, i32),
+    pub ghost_position: (i32, i32),
     pub score: i32,
     pub busts: i32,
     pub conditional_probabilities: Vec<ConditionalProbabilities>,
@@ -85,9 +88,23 @@ impl Game {
         }
     }
 
+    pub fn reset(&mut self) {
+        for x in 0..self.grid.len() {
+            for y in 0..self.grid[0].len() {
+                self.grid[x as usize][y as usize].color = "white".to_string();
+                self.grid[x as usize][y as usize].probability = 0.0;
+                self.grid[x as usize][y as usize].visited = false;
+            }
+        }
+        self.score = 30;
+        self.busts = 2;
+        self.place_ghost();
+        self.compute_initial_prior_probabilities();
+    }
+
     pub fn place_ghost(&mut self) {
-        let x = rand::random::<i32>() % self.grid.len() as i32;
-        let y = rand::random::<i32>() % self.grid[0].len() as i32;
+        let x = (rand::random::<i32>()).abs() % self.grid.len() as i32;
+        let y = (rand::random::<i32>()).abs() % self.grid[0].len() as i32;
         self.ghost_position = (x, y);
     }
 
@@ -99,16 +116,16 @@ impl Game {
         }
     }
 
-    pub fn distance_sense(&self, x: i32, y: i32) -> String {
+    pub fn distance_sense(&mut self, x: i32, y: i32) -> String {
+        self.score -= 1;
         let distance = (x - self.ghost_position.0).abs() + (y - self.ghost_position.1).abs();
-        // Return a random color based on the conditional probabilities
-        // for the distance between the ghost and the cell (x, y)
-        // The color is chosen based on the probabilities in the table above
-        // For example, if the distance is 0, the color is chosen based on the probabilities
-        // in the first row of the table above
+        
 
-        let random_number = rand::random::<f32>();
-        // let cumulative_probability = 0.0;
+        let between = rand::distributions::Uniform::from(0.0..1.0);
+        let mut rng = rand::thread_rng();
+        let random_number = between.sample_iter(&mut rng).next().unwrap();
+        log!("Random number: {}, distance: {}", random_number, distance);
+
         let index = match self
             .conditional_probabilities
             .iter()
@@ -117,6 +134,7 @@ impl Game {
             Some(i) => i,
             None => 5,
         };
+        log!("Index: {}", index);
         if random_number < self.conditional_probabilities[index].green {
             "green".to_string()
         } else if random_number < self.conditional_probabilities[index].yellow {
@@ -124,16 +142,19 @@ impl Game {
         } else if random_number < self.conditional_probabilities[index].orange {
             "orange".to_string()
         } else {
+            // red
             "red".to_string()
         }
     }
 
-    pub fn bust_ghost(&mut self, x: i32, y: i32) -> bool {
+    pub fn bust_ghost(&mut self, x: i32, y: i32) -> i8 {
         self.busts -= 1;
         if self.ghost_position.0 == x && self.ghost_position.1 == y {
-            true
+            return 1
+        } else if self.busts == 0 {
+            return 0
         } else {
-            false
+            return -1
         }
     }
 

@@ -15,9 +15,11 @@ pub fn GameView() -> impl IntoView {
     let (peeping, set_peeping) = create_signal(true);
     let (button_text, set_button_text) = create_signal("Hide");
     let (clicked_cell, set_clicked_cell) = create_signal((0, 0));
+    let (state, set_state) = create_signal(-1);
     // compute initial game state
     set_game.update(|game| {
         game.place_ghost();
+        // log!("Ghost position: {}, {}", game.ghost_position.0, game.ghost_position.1);
         game.compute_initial_prior_probabilities();
     });
 
@@ -34,11 +36,23 @@ pub fn GameView() -> impl IntoView {
 
     let handle_bust = move |_| {
         set_game.update(|game| {
-            game.bust_ghost(0, 0);
+            let result = game.bust_ghost(clicked_cell.get().0, clicked_cell.get().1);
+            if result == 0 {
+                set_state.update(|state| *state = 0);
+                log!("Out of busts! You lose!");
+            } else if result == 1 {
+                set_state.update(|state| *state = 1);
+                log!("You win!");
+            } else {
+                set_state.update(|state| *state = -2);
+                log!("Missed!");
+            }
         });
     };
 
     let cells = move || {
+        // log!(&format!("Ghost position: {}, {}", gm.get().ghost_position.0, gm.get().ghost_position.1));
+        // log!(&format!("Game state: {:?}", gm.get()));
         gm.get().grid.iter().flat_map(|row| row.iter()).map(|cell| {
             let color = cell.color.clone();
             let probability = cell.probability;
@@ -50,21 +64,32 @@ pub fn GameView() -> impl IntoView {
             // let is_hovered = use_element_hover(el);
             view! {
                 <button
-                    style=format!("background-color: {}; border: 1px solid black;display: flex; align-items: center; justify-content: center", color)
+                    style=format!("background-color: {}; border: 1px solid black;display: flex; align-items: center; justify-content: center; cursor: pointer", color)
                     style:border= move || format!("1px solid {}", if clicked.get() == (x, y) {"red"} else {"black"})
                     
                     on:click=move |_| {
                         set_clicked.update(|clicked| *clicked = (x, y));
                         set_game.update(|game| {
+                            log!(&format!("Clicked: {}, {}", x, y));
+                            if game.grid[x as usize][y as usize].visited {
+                                return;
+                            }
+                            game.grid[x as usize][y as usize].visited = true;
                             log!(&format!("Bust: {}, {}", x, y));
+                            // log!(&format!("Game state: {:?}", game));
                             let color = game.distance_sense(x, y);
+                            if game.score == 0 {
+                                set_state.update(|state| *state = 0);
+                                log!("Out of attempts! You lose!");
+                            }
                             game.grid[x as usize][y as usize].color = color.clone();
                             game.update_posterior_ghost_location_probabilities(color, x, y);
                         });
                     }
                 >
                     {if peeping.get() {
-                        format!("{:.2}%", probability*100.0)
+                        // format!("{:.2}%", probability*100.0)
+                        format!("{:.4}", probability)
                     } else {
                         "".to_string()
                     }}
@@ -80,20 +105,61 @@ pub fn GameView() -> impl IntoView {
         // id=leptos means cargo-leptos will hot-reload this stylesheet
 
         // sets the document title
-        <div style="display: flex; flex-direction: column; align-items: center;">
+        <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            {
+                move || match state.get() {
+                    0 | 1 => {
+                        view! {
+                            <div style="position: absolute; background-color: rgba(0, 0, 0, 0.5); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                <div style="background-color: white; padding: 20px; border-radius: 4px; display: flex; flex-direction: column; align-items: center;">
+                                    <h1 style="text-align: center;">{if state.get() == 0 {"You lose!"} else {"You win!"}}</h1>
+                                    <button on:click=move |_| {
+                                        set_state.update(|state| *state = -1);
+                                        set_game.update(|game| {
+                                            game.reset();
+                                            game.place_ghost();
+                                            game.compute_initial_prior_probabilities();
+                                        });
+                                    } style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: green; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
+                                        Play again
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    },
+                    _ => view! {<div></div>},
+                }
+            }
+            <div style="display: flex; flex-direction: column; align-items: center;height: 80%; width: 80%">
+                <div style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <h1 style="text-align: center;">Ghost Buster</h1>
+                    <p style="text-align: center;">Click on a cell to bust the ghost. The color of the cell will give you a clue about the ghosts location.</p>
+                    <p style="text-align: center;">Score: {move || gm.get().score} attempte left</p>
+                    <p style="text-align: center;">Busts: {move || gm.get().busts} left</p>
+                    {move || match state.get() {
+                        -2 => {
+                            view! {
+                                <p style="text-align: center; color: red;">Missed! Try again!</p>
+                            }
+                        },
+                        _ => {
+                            view! {
+                                <p style="text-align: center; color: white; user-select: none">{"a"}</p>
+                            }
+                        }
+                    }}
 
-            <div style="display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(9, 1fr); width: 60vw; height: 70vh;margin: auto;">
-                {
-                    cells
-                  }
-                  
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(9, 1fr); width: 100%; height: 100%;margin: auto;">
+                    {cells}
+                </div>
+                <button on:click=handle_peep style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: green; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
+                    {move || button_text.get()}
+                </button>
+                <button on:click=handle_bust style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: red; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
+                    Bust {"("}{move || clicked_cell.get().0}, {move || clicked_cell.get().1}{")"}
+                </button>
             </div>
-            <button on:click=handle_peep style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: green; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
-                {move || button_text.get()}
-            </button>
-            <button on:click=handle_bust style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: red; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
-                Bust {"("}{move || clicked_cell.get().0}, {move || clicked_cell.get().1}{")"}
-            </button>
         </div>
     }
 }
