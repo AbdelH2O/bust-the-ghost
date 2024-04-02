@@ -63,7 +63,6 @@ pub struct Game {
 
 // implement the clone trait for the Game struct
 
-
 impl Game {
     pub fn new(w: i32, h: i32) -> Game {
         let mut grid = vec![];
@@ -114,7 +113,8 @@ impl Game {
     pub fn compute_initial_prior_probabilities(&mut self) {
         for x in 0..self.grid.len() {
             for y in 0..self.grid[0].len() {
-                self.grid[x as usize][y as usize].probability = 1.0 / (self.grid.len() * self.grid[0].len()) as f32;
+                self.grid[x as usize][y as usize].probability =
+                    1.0 / (self.grid.len() * self.grid[0].len()) as f32;
             }
         }
     }
@@ -125,7 +125,6 @@ impl Game {
         let distance = (self.ghost_position.0 - x).abs() + (self.ghost_position.1 - y).abs();
 
         let distance = if distance > 5 { 5 } else { distance };
-        
 
         // let between = rand::distributions::Uniform::from(0.0..1.0);
         // let mut rng = rand::thread_rng();
@@ -145,34 +144,34 @@ impl Game {
         random_color.to_string()
         // "red".to_string()
         // let index = match self
-            // .conditional_probabilities
-            // .iter()
-            // .position(|p| p.distance == distance)
+        // .conditional_probabilities
+        // .iter()
+        // .position(|p| p.distance == distance)
         // {
-            // Some(i) => i,
-            // None => 5,
+        // Some(i) => i,
+        // None => 5,
         // };
         // log!("Index: {}", index);
         // if random_number < self.conditional_probabilities[index].green {
-            // "green".to_string()
+        // "green".to_string()
         // } else if random_number < self.conditional_probabilities[index].yellow {
-            // "yellow".to_string()
+        // "yellow".to_string()
         // } else if random_number < self.conditional_probabilities[index].orange {
-            // "orange".to_string()
+        // "orange".to_string()
         // } else {
-            // red
-            // "red".to_string()
+        // red
+        // "red".to_string()
         // }
     }
 
     pub fn bust_ghost(&mut self, x: i32, y: i32) -> i8 {
         self.busts -= 1;
         if self.ghost_position.0 == x && self.ghost_position.1 == y {
-            return 1
+            return 1;
         } else if self.busts == 0 {
-            return 0
+            return 0;
         } else {
-            return -1
+            return -1;
         }
     }
 
@@ -186,9 +185,9 @@ impl Game {
                 // Get the (i, j) cell's distance from the ghost position based on its distance from the (x, y) cell
                 // and the distance between the (x, y) cell and the ghost position (given by the
                 // color)
-                
+
                 let dist = (x - i as i32).abs() + (y - j as i32).abs();
-                
+
                 let index = match self
                     .conditional_probabilities
                     .iter()
@@ -215,18 +214,18 @@ impl Game {
             for j in 0..self.grid[0].len() {
                 self.grid[i as usize][j as usize].probability /= sum;
                 // println!(
-                    // "({}, {}): {:.2}%",
-                    // i,
-                    // j,
-                    // self.grid[i as usize][j as usize].probability * 100.0
+                // "({}, {}): {:.2}%",
+                // i,
+                // j,
+                // self.grid[i as usize][j as usize].probability * 100.0
                 // );
                 // log!(
-                    // &format!(
-                        // "({}, {}): {:.2}%",
-                        // i,
-                        // j,
-                        // self.grid[i as usize][j as usize].probability * 100.0
-                    // )
+                // &format!(
+                // "({}, {}): {:.2}%",
+                // i,
+                // j,
+                // self.grid[i as usize][j as usize].probability * 100.0
+                // )
                 // );
             }
         }

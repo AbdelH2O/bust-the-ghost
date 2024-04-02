@@ -1,8 +1,9 @@
 use crate::game::*;
+use gloo::console::log;
+use leptos::html::Button;
 use leptos::*;
 use leptos_meta::*;
-use leptos::html::Button;
-use gloo::console::log;
+// use lepto p
 
 #[component]
 pub fn GameView() -> impl IntoView {
@@ -66,7 +67,6 @@ pub fn GameView() -> impl IntoView {
                 <button
                     style=format!("background-color: {}; border: 1px solid black;display: flex; align-items: center; justify-content: center; cursor: pointer", color)
                     style:border= move || format!("1px solid {}", if clicked.get() == (x, y) {"red"} else {"black"})
-                    
                     on:click=move |_| {
                         set_clicked.update(|clicked| *clicked = (x, y));
                         set_game.update(|game| {
@@ -97,8 +97,6 @@ pub fn GameView() -> impl IntoView {
             }
         }).collect::<Vec<_>>()
     };
-
-    
 
     view! {
         // injects a stylesheet into the document <head>
