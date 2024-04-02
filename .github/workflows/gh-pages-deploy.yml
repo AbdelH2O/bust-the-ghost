@@ -1,4 +1,4 @@
-name: Relname: Release to Github Pages
+name: Release to Github Pages
 
 on:
   push:
