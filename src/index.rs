@@ -1,13 +1,11 @@
 use crate::game::*;
 use gloo::console::log;
 use leptos::*;
-use leptos_meta::*;
 // use lepto p
 
 #[component]
 pub fn GameView() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
-    provide_meta_context();
 
     let game = Game::new(9, 12);
     // create a signal to update the game state
