@@ -268,12 +268,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "allocator-api2"
-version = "0.2.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0942ffc6dcaadf03badf6e6a2d0228460359d5e34b57ccdc720b7382dfbd5ec5"
-
-[[package]]
 name = "anyhow"
 version = "1.0.81"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -436,7 +430,6 @@ dependencies = [
  "http 1.1.0",
  "leptos",
  "leptos-use",
- "leptos_actix",
  "leptos_meta",
  "leptos_router",
  "rand",
@@ -480,38 +473,6 @@ checksum = "74d80203ea6b29df88012294f62733de21cfeab47f17b41af3a38bc30a03ee72"
 dependencies = [
  "bytes",
 ]
-
-[[package]]
-name = "cached"
-version = "0.45.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90eb5776f28a149524d1d8623035760b4454ec881e8cf3838fa8d7e1b11254b3"
-dependencies = [
- "cached_proc_macro",
- "cached_proc_macro_types",
- "hashbrown 0.13.2",
- "instant",
- "once_cell",
- "thiserror",
-]
-
-[[package]]
-name = "cached_proc_macro"
-version = "0.18.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c878c71c2821aa2058722038a59a67583a4240524687c6028571c9b395ded61f"
-dependencies = [
- "darling 0.14.4",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "cached_proc_macro_types"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ade8366b8bd5ba243f0a58f036cc0ca8a2f069cff1a2351ef1cac6b083e16fc0"
 
 [[package]]
 name = "camino"
@@ -684,36 +645,12 @@ dependencies = [
 
 [[package]]
 name = "darling"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b750cb3417fd1b327431a470f388520309479ab0bf5e323505daf0290cd3850"
-dependencies = [
- "darling_core 0.14.4",
- "darling_macro 0.14.4",
-]
-
-[[package]]
-name = "darling"
 version = "0.20.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "54e36fcd13ed84ffdfda6f5be89b31287cbb80c439841fe69e04841435464391"
 dependencies = [
- "darling_core 0.20.8",
- "darling_macro 0.20.8",
-]
-
-[[package]]
-name = "darling_core"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "109c1ca6e6b7f82cc233a97004ea8ed7ca123a9af07a8230878fcfda9b158bf0"
-dependencies = [
- "fnv",
- "ident_case",
- "proc-macro2",
- "quote",
- "strsim",
- "syn 1.0.109",
+ "darling_core",
+ "darling_macro",
 ]
 
 [[package]]
@@ -732,22 +669,11 @@ dependencies = [
 
 [[package]]
 name = "darling_macro"
-version = "0.14.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4aab4dbc9f7611d8b55048a3a16d2d010c2c8334e46304b40ac1cc14bf3b48e"
-dependencies = [
- "darling_core 0.14.4",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "darling_macro"
 version = "0.20.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a668eda54683121533a393014d8692171709ff57a7d61f187b6e782719f8933f"
 dependencies = [
- "darling_core 0.20.8",
+ "darling_core",
  "quote",
  "syn 2.0.55",
 ]
@@ -771,7 +697,7 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fa90da96b8fd491f5754d1f7a731f73921e3b7aa0ce333c821a0e43666ac14"
 dependencies = [
- "darling 0.20.8",
+ "darling",
  "proc-macro2",
  "quote",
  "syn 2.0.55",
@@ -1252,19 +1178,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
-
-[[package]]
-name = "hashbrown"
 version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
-dependencies = [
- "ahash 0.8.11",
- "allocator-api2",
-]
 
 [[package]]
 name = "html-escape"
@@ -1339,15 +1255,6 @@ checksum = "168fb715dda47215e360912c096649d23d58bf392ac62f73919e831745e40f26"
 dependencies = [
  "equivalent",
  "hashbrown 0.14.3",
-]
-
-[[package]]
-name = "instant"
-version = "0.1.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a5bbe824c507c5da5956355e86a746d82e0e1464f65d862cc5e71da70e94b2c"
-dependencies = [
- "cfg-if",
 ]
 
 [[package]]
@@ -1451,28 +1358,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "leptos_actix"
-version = "0.6.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9edb4789a15864a26d695038f42dcdf1d1c32d3a1f537751ce177c97f4f5e3dd"
-dependencies = [
- "actix-http",
- "actix-web",
- "futures",
- "leptos",
- "leptos_integration_utils",
- "leptos_macro",
- "leptos_meta",
- "leptos_router",
- "parking_lot",
- "regex",
- "serde_json",
- "server_fn",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "leptos_config"
 version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1534,20 +1419,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "leptos_integration_utils"
-version = "0.6.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff00799857159434d31b6bd1898e21c63f69f39289621da5a554fcab1c3e7300"
-dependencies = [
- "futures",
- "leptos",
- "leptos_config",
- "leptos_hot_reload",
- "leptos_meta",
- "tracing",
-]
-
-[[package]]
 name = "leptos_macro"
 version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1605,7 +1476,6 @@ dependencies = [
  "serde_json",
  "slotmap",
  "thiserror",
- "tokio",
  "tracing",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -1618,27 +1488,21 @@ version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9460a5dc184fa05d8eb635b687ad3220d02d2d23d6f49c3bf146aa71e427f423"
 dependencies = [
- "cached",
  "cfg-if",
  "gloo-net 0.2.6",
  "itertools",
  "js-sys",
  "lazy_static",
  "leptos",
- "leptos_integration_utils",
- "leptos_meta",
  "linear-map",
- "lru",
  "once_cell",
  "percent-encoding",
- "regex",
  "send_wrapper",
  "serde",
  "serde_json",
  "serde_qs",
  "thiserror",
  "tracing",
- "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -1708,15 +1572,6 @@ name = "log"
 version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
-
-[[package]]
-name = "lru"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4a83fb7698b3643a0e34f9ae6f2e8f0178c0fd42f8b59d493aa271ff3a5bf21"
-dependencies = [
- "hashbrown 0.14.3",
-]
 
 [[package]]
 name = "manyhow"
@@ -2347,7 +2202,6 @@ version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2955da1dc5fcd970c182ebf1089af6c5f19051e1f286a21f7b96490a49b7a531"
 dependencies = [
- "actix-web",
  "bytes",
  "ciborium",
  "const_format",
@@ -2355,7 +2209,6 @@ dependencies = [
  "futures",
  "gloo-net 0.5.0",
  "http 1.1.0",
- "inventory",
  "js-sys",
  "once_cell",
  "send_wrapper",
