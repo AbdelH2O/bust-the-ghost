@@ -88,8 +88,8 @@ pub fn GameView() -> impl IntoView {
                     }
                 >
                     {if peeping.get() {
-                        // format!("{:.2}%", probability*100.0)
-                        format!("{:.4}", probability)
+                        format!("{:.2}%", probability*100.0)
+                        // format!("{:.4}", probability)
                     } else {
                         "".to_string()
                     }}
@@ -120,7 +120,7 @@ pub fn GameView() -> impl IntoView {
                                             game.place_ghost();
                                             game.compute_initial_prior_probabilities();
                                         });
-                                    } style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: green; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
+                                    } style="padding: 10px;cursor: pointer; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: green; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
                                         Play again
                                     </button>
                                 </div>
@@ -153,10 +153,10 @@ pub fn GameView() -> impl IntoView {
                 <div style="display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(9, 1fr); width: 100%; height: 100%;margin: auto;">
                     {cells}
                 </div>
-                <button on:click=handle_peep style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: green; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
+                <button on:click=handle_peep style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: green; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;cursor:pointer">
                     {move || button_text.get()}
                 </button>
-                <button on:click=handle_bust style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: red; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;">
+                <button on:click=handle_bust style="padding: 10px; padding-left: 20px; padding-right: 20px; margin-top: 20px; background-color: red; color: white; border-radius: 4px; border: none; width: 200px; font-size: 20px;cursor: pointer">
                     Bust {"("}{move || clicked_cell.get().0}, {move || clicked_cell.get().1}{")"}
                 </button>
             </div>

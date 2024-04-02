@@ -42,9 +42,12 @@ impl ConditionalProbabilities {
         ConditionalProbabilities {
             distance,
             green,
-            yellow: yellow + green,
-            orange: orange + yellow + green,
-            red: red + orange + yellow + green,
+            yellow,
+            orange,
+            red,
+            // yellow: yellow + green,
+            // orange: orange + yellow + green,
+            // red: red + orange + yellow + green,
         }
     }
 }
@@ -118,33 +121,48 @@ impl Game {
 
     pub fn distance_sense(&mut self, x: i32, y: i32) -> String {
         self.score -= 1;
-        let distance = (x - self.ghost_position.0).abs() + (y - self.ghost_position.1).abs();
+        // Distance needs to be between 0 and 5
+        let distance = (self.ghost_position.0 - x).abs() + (self.ghost_position.1 - y).abs();
+
+        let distance = if distance > 5 { 5 } else { distance };
         
 
-        let between = rand::distributions::Uniform::from(0.0..1.0);
+        // let between = rand::distributions::Uniform::from(0.0..1.0);
+        // let mut rng = rand::thread_rng();
+        // let random_number = between.sample_iter(&mut rng).next().unwrap();
+        let choices = ["green", "yellow", "orange", "red"];
+        let weights = [
+            self.conditional_probabilities[distance as usize].green * 100.0,
+            self.conditional_probabilities[distance as usize].yellow * 100.0,
+            self.conditional_probabilities[distance as usize].orange * 100.0,
+            self.conditional_probabilities[distance as usize].red * 100.0,
+        ];
+        log!(&format!("Weights: {:?}", weights));
+        let dist = rand::distributions::WeightedIndex::new(&weights).unwrap();
         let mut rng = rand::thread_rng();
-        let random_number = between.sample_iter(&mut rng).next().unwrap();
-        log!("Random number: {}, distance: {}", random_number, distance);
-
-        let index = match self
-            .conditional_probabilities
-            .iter()
-            .position(|p| p.distance == distance)
-        {
-            Some(i) => i,
-            None => 5,
-        };
-        log!("Index: {}", index);
-        if random_number < self.conditional_probabilities[index].green {
-            "green".to_string()
-        } else if random_number < self.conditional_probabilities[index].yellow {
-            "yellow".to_string()
-        } else if random_number < self.conditional_probabilities[index].orange {
-            "orange".to_string()
-        } else {
+        let random_color = choices[dist.sample(&mut rng)];
+        log!("Random number: {}, distance: {}", random_color, distance);
+        random_color.to_string()
+        // "red".to_string()
+        // let index = match self
+            // .conditional_probabilities
+            // .iter()
+            // .position(|p| p.distance == distance)
+        // {
+            // Some(i) => i,
+            // None => 5,
+        // };
+        // log!("Index: {}", index);
+        // if random_number < self.conditional_probabilities[index].green {
+            // "green".to_string()
+        // } else if random_number < self.conditional_probabilities[index].yellow {
+            // "yellow".to_string()
+        // } else if random_number < self.conditional_probabilities[index].orange {
+            // "orange".to_string()
+        // } else {
             // red
-            "red".to_string()
-        }
+            // "red".to_string()
+        // }
     }
 
     pub fn bust_ghost(&mut self, x: i32, y: i32) -> i8 {
