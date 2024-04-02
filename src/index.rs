@@ -1,6 +1,5 @@
 use crate::game::*;
 use gloo::console::log;
-use leptos::html::Button;
 use leptos::*;
 use leptos_meta::*;
 // use lepto p
@@ -17,10 +16,10 @@ pub fn GameView() -> impl IntoView {
     let (button_text, set_button_text) = create_signal("Hide");
     let (clicked_cell, set_clicked_cell) = create_signal((0, 0));
     let (state, set_state) = create_signal(-1);
+    let (direction_hint, set_direction_hint) = create_signal("".to_string());
     // compute initial game state
     set_game.update(|game| {
         game.place_ghost();
-        // log!("Ghost position: {}, {}", game.ghost_position.0, game.ghost_position.1);
         game.compute_initial_prior_probabilities();
     });
 
@@ -52,8 +51,6 @@ pub fn GameView() -> impl IntoView {
     };
 
     let cells = move || {
-        // log!(&format!("Ghost position: {}, {}", gm.get().ghost_position.0, gm.get().ghost_position.1));
-        // log!(&format!("Game state: {:?}", gm.get()));
         gm.get().grid.iter().flat_map(|row| row.iter()).map(|cell| {
             let color = cell.color.clone();
             let probability = cell.probability;
@@ -61,8 +58,6 @@ pub fn GameView() -> impl IntoView {
             let y = cell.y;
             let clicked = clicked_cell.clone();
             let set_clicked = set_clicked_cell.clone();
-            let el = create_node_ref::<Button>();
-            // let is_hovered = use_element_hover(el);
             view! {
                 <button
                     style=format!("background-color: {}; border: 1px solid black;display: flex; align-items: center; justify-content: center; cursor: pointer", color)
@@ -71,25 +66,25 @@ pub fn GameView() -> impl IntoView {
                         set_clicked.update(|clicked| *clicked = (x, y));
                         set_game.update(|game| {
                             log!(&format!("Clicked: {}, {}", x, y));
+                            let (color, direction) = game.distance_sense(x, y);
+                            set_direction_hint.update(|hint| *hint = direction.clone());
+                            log!(&format!("Color: {}, Direction: {}", color, direction.clone()));
                             if game.grid[x as usize][y as usize].visited {
                                 return;
                             }
                             game.grid[x as usize][y as usize].visited = true;
                             log!(&format!("Bust: {}, {}", x, y));
-                            // log!(&format!("Game state: {:?}", game));
-                            let color = game.distance_sense(x, y);
                             if game.score == 0 {
                                 set_state.update(|state| *state = 0);
                                 log!("Out of attempts! You lose!");
                             }
                             game.grid[x as usize][y as usize].color = color.clone();
-                            game.update_posterior_ghost_location_probabilities(color, x, y);
+                            game.update_posterior_ghost_location_probabilities(color, x, y, direction);
                         });
                     }
                 >
                     {if peeping.get() {
                         format!("{:.2}%", probability*100.0)
-                        // format!("{:.4}", probability)
                     } else {
                         "".to_string()
                     }}
@@ -130,7 +125,7 @@ pub fn GameView() -> impl IntoView {
             }
             <div style="display: flex; flex-direction: column; align-items: center;height: 80%; width: 80%">
                 <div style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    <h1 style="text-align: center;">Ghost Buster</h1>
+                    <h1 style="text-align: center;">Bust The Ghost</h1>
                     <p style="text-align: center;">Click on a cell to bust the ghost. The color of the cell will give you a clue about the ghosts location.</p>
                     <p style="text-align: center;">Score: {move || gm.get().score} attempte left</p>
                     <p style="text-align: center;">Busts: {move || gm.get().busts} left</p>
@@ -146,7 +141,25 @@ pub fn GameView() -> impl IntoView {
                             }
                         }
                     }}
-
+                    {move || if direction_hint.get().len() > 0 {
+                        view! {
+                            <p style="text-align: center; color: #1d4ed8;font-size: 20px">{move || direction_hint.get()}{" "}{move || match direction_hint.get().as_str(){
+                                "N" => "⬆️",
+                                "S" => "⬇️",
+                                "E" => "➡️",
+                                "W" => "⬅️",
+                                "NE" => "↗️",
+                                "NW" => "↖️",
+                                "SE" => "↘️",
+                                "SW" => "↙️",
+                                _ => "😱"
+                            }}</p>
+                        }
+                    } else {
+                        view! {
+                            <p style="text-align: center; color: white; user-select: none;font-size: 20px">{"a"}</p>
+                        }
+                    }}
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(9, 1fr); width: 100%; height: 100%;margin: auto;">
                     {cells}

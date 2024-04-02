@@ -52,6 +52,34 @@ impl ConditionalProbabilities {
     }
 }
 
+pub fn relative_direction(x: i32, y: i32, ghost_x: i32, ghost_y: i32) -> String {
+    if ghost_x < x {
+        if ghost_y < y {
+            "NW".to_string()
+        } else if ghost_y > y {
+            "NE".to_string()
+        } else {
+            "N".to_string()
+        }
+    } else if ghost_x > x {
+        if ghost_y < y {
+            "SW".to_string()
+        } else if ghost_y > y {
+            "SE".to_string()
+        } else {
+            "S".to_string()
+        }
+    } else {
+        if ghost_y < y {
+            "W".to_string()
+        } else if ghost_y > y {
+            "E".to_string()
+        } else {
+            "BINGO!".to_string()
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Game {
     pub grid: Vec<Vec<Cell>>,
@@ -119,7 +147,7 @@ impl Game {
         }
     }
 
-    pub fn distance_sense(&mut self, x: i32, y: i32) -> String {
+    pub fn distance_sense(&mut self, x: i32, y: i32) -> (String, String) {
         self.score -= 1;
         // Distance needs to be between 0 and 5
         let distance = (self.ghost_position.0 - x).abs() + (self.ghost_position.1 - y).abs();
@@ -141,27 +169,14 @@ impl Game {
         let mut rng = rand::thread_rng();
         let random_color = choices[dist.sample(&mut rng)];
         log!("Random number: {}, distance: {}", random_color, distance);
-        random_color.to_string()
-        // "red".to_string()
-        // let index = match self
-        // .conditional_probabilities
-        // .iter()
-        // .position(|p| p.distance == distance)
-        // {
-        // Some(i) => i,
-        // None => 5,
-        // };
-        // log!("Index: {}", index);
-        // if random_number < self.conditional_probabilities[index].green {
-        // "green".to_string()
-        // } else if random_number < self.conditional_probabilities[index].yellow {
-        // "yellow".to_string()
-        // } else if random_number < self.conditional_probabilities[index].orange {
-        // "orange".to_string()
-        // } else {
-        // red
-        // "red".to_string()
-        // }
+        log!(&format!("Ghost position: {}, {}", self.ghost_position.0, self.ghost_position.1));
+
+        // Get direction of ghost relative to the cell (NE, NW, SE, SW)
+        
+        let direction = relative_direction(x, y, self.ghost_position.0, self.ghost_position.1);
+
+        (random_color.to_string(), direction.to_string())
+
     }
 
     pub fn bust_ghost(&mut self, x: i32, y: i32) -> i8 {
@@ -175,7 +190,7 @@ impl Game {
         }
     }
 
-    pub fn update_posterior_ghost_location_probabilities(&mut self, color: String, x: i32, y: i32) {
+    pub fn update_posterior_ghost_location_probabilities(&mut self, color: String, x: i32, y: i32, g_direction: String) {
         // Update the probabilities of the ghost being in each cell based on the color sensed in the cell (x, y)
         // and the other sensed colors in the grid
 
@@ -206,27 +221,18 @@ impl Game {
                 } else {
                     self.conditional_probabilities[index].red
                 };
-                self.grid[i as usize][j as usize].probability = prior * likelihood;
+                let direction = relative_direction(x, y, i as i32, j as i32);
+                let directed_likelihood = match direction.as_str() == g_direction.as_str() {
+                    true => 0.75,
+                    false => 0.25,
+                };
+                self.grid[i as usize][j as usize].probability = prior * likelihood * directed_likelihood;
                 sum += self.grid[i as usize][j as usize].probability;
             }
         }
         for i in 0..self.grid.len() {
             for j in 0..self.grid[0].len() {
                 self.grid[i as usize][j as usize].probability /= sum;
-                // println!(
-                // "({}, {}): {:.2}%",
-                // i,
-                // j,
-                // self.grid[i as usize][j as usize].probability * 100.0
-                // );
-                // log!(
-                // &format!(
-                // "({}, {}): {:.2}%",
-                // i,
-                // j,
-                // self.grid[i as usize][j as usize].probability * 100.0
-                // )
-                // );
             }
         }
     }
