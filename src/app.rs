@@ -19,8 +19,8 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 <Routes>
-                    <Route path="/bust-the-ghost" view=GameView/>
-                    <Route path="/*any" view=NotFound/>
+                    <Route path="/*any" view=GameView/>
+                    // <Route path="/*any" view=NotFound/>
                 </Routes>
             </main>
         </Router>
